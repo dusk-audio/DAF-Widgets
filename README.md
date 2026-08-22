@@ -1,18 +1,35 @@
-# DPF Widgets
-## Official and Community made reusable GUI widgets for [DPF](https://github.com/DISTRHO/DPF/)
+# DAF Widgets
+## Reusable GUI widgets for [DAF](https://github.com/dusk-audio/DAF), the Dusk Audio Framework
 
-This is a repository for shared GUI widgets targetting [DPF](https://github.com/DISTRHO/DPF/).
+**This is a fork of [DISTRHO/DPF-Widgets](https://github.com/DISTRHO/DPF-Widgets) by Filipe Coelho
+and contributors.** Essentially all of the code here is theirs and it is very good; this fork
+carries a two-line MSVC compatibility fix and exists so that [Dusk Audio](https://github.com/dusk-audio)
+builds pin one tree they control alongside [DAF](https://github.com/dusk-audio/DAF). If you are
+building on DPF, use DISTRHO's original.
 
-Since [DPF](https://github.com/DISTRHO/DPF/) allows multiple backends (cairo, opengl or vulkan), we need to split them as such.
+Renamed from DPF-Widgets to DAF-Widgets in August 2026 so that two identically named repositories
+stop sending people and tooling to the wrong tree. The name marks whose checkout this is, not
+whose work it is. Original copyright notices and licence terms are retained in every file.
+
+Development here is one-way in both directions: nothing is submitted to DISTRHO, and no DISTRHO
+commit is merged back in. Report bugs on the
+[dusk-audio/DAF-Widgets issue tracker](https://github.com/dusk-audio/DAF-Widgets/issues).
+
+---
+
+This is a repository for shared GUI widgets targetting [DAF](https://github.com/dusk-audio/DAF)
+(and, upstream, [DPF](https://github.com/DISTRHO/DPF/)).
+
+Since [DAF](https://github.com/dusk-audio/DAF) allows multiple backends (cairo, opengl or vulkan), we need to split them as such.
 Each folder provides widgets for its dedicated backend type.
 It is not mandatory that a widget is usable for more than 1 backend.
-Generic widgets (those based on DPF core classes like Color, Rectangle, etc) are placed under the "generic" directory.
+Generic widgets (those based on DAF core classes like Color, Rectangle, etc) are placed under the "generic" directory.
 
 ## Status
 
 #### generic / ResizeHandle
 
-Resize handle for DPF windows, will sit on bottom-right.
+Resize handle for DAF windows, will sit on bottom-right.
 
 Works in both Cairo and OpenGL modes (classic/legacy OpenGL only, does not support OpenGL3 mode).
 
