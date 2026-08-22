@@ -1,5 +1,5 @@
 /*
- * LVGL for DPF
+ * LVGL for DAF
  * Copyright (C) 2024 Filipe Coelho <falktx@falktx.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any purpose with
@@ -17,7 +17,7 @@
 #pragma once
 
 #if __cplusplus < 201103L
-# error DPF LVGL widgets require C++11
+# error DAF LVGL widgets require C++11
 #endif
 
 #include "SubWidget.hpp"
@@ -35,67 +35,67 @@ START_NAMESPACE_DGL
 // --------------------------------------------------------------------------------------------------------------------
 
 #if !defined(LV_ENABLE_GLOBAL_CUSTOM) || LV_ENABLE_GLOBAL_CUSTOM != 1
-# error LV_ENABLE_GLOBAL_CUSTOM must be set to 1 for DPF builds
+# error LV_ENABLE_GLOBAL_CUSTOM must be set to 1 for DAF builds
 #endif
 
 #if defined(DGL_CAIRO) && LV_COLOR_DEPTH != 32
-# error LV_COLOR_DEPTH must be 32 for Cairo DPF builds
+# error LV_COLOR_DEPTH must be 32 for Cairo DAF builds
 #endif
 
 #if LV_DEF_REFR_PERIOD != 1
-# error LV_DEF_REFR_PERIOD must be 1 for DPF builds
+# error LV_DEF_REFR_PERIOD must be 1 for DAF builds
 #endif
 
 #if defined(LV_USE_PRIVATE_API) && !LV_USE_PRIVATE_API
-# error LV_USE_PRIVATE_API must be set to 1 for DPF builds
+# error LV_USE_PRIVATE_API must be set to 1 for DAF builds
 #endif
 
 #if LV_USE_STDLIB_MALLOC != LV_STDLIB_CLIB
-# error LV_USE_STDLIB_MALLOC must be LV_STDLIB_CLIB for DPF builds
+# error LV_USE_STDLIB_MALLOC must be LV_STDLIB_CLIB for DAF builds
 #endif
 
 #if LV_USE_STDLIB_STRING != LV_STDLIB_CLIB
-# error LV_USE_STDLIB_STRING must be LV_STDLIB_CLIB for DPF builds
+# error LV_USE_STDLIB_STRING must be LV_STDLIB_CLIB for DAF builds
 #endif
 
 #if LV_USE_STDLIB_SPRINTF != LV_STDLIB_CLIB
-# error LV_USE_STDLIB_SPRINTF must be LV_STDLIB_CLIB for DPF builds
+# error LV_USE_STDLIB_SPRINTF must be LV_STDLIB_CLIB for DAF builds
 #endif
 
 #if defined(LV_USE_OS) && LV_USE_OS != LV_OS_NONE
-# error LV_USE_OS must be LV_OS_NONE for DPF builds
+# error LV_USE_OS must be LV_OS_NONE for DAF builds
 #endif
 
 #if defined(LV_USE_EVDEV) && LV_USE_EVDEV
-# error LV_USE_EVDEV must not be enabled for DPF builds
+# error LV_USE_EVDEV must not be enabled for DAF builds
 #endif
 
 #if defined(LV_USE_LIBINPUT) && LV_USE_LIBINPUT
-# error LV_USE_LIBINPUT must not be enabled for DPF builds
+# error LV_USE_LIBINPUT must not be enabled for DAF builds
 #endif
 
 #if defined(LV_USE_LINUX_DRM) && LV_USE_LINUX_DRM
-# error LV_USE_LINUX_DRM must not be enabled for DPF builds
+# error LV_USE_LINUX_DRM must not be enabled for DAF builds
 #endif
 
 #if defined(LV_USE_LINUX_FBDEV) && LV_USE_LINUX_FBDEV
-# error LV_USE_LINUX_FBDEV must not be enabled for DPF builds
+# error LV_USE_LINUX_FBDEV must not be enabled for DAF builds
 #endif
 
 #if defined(LV_USE_NUTTX) && LV_USE_NUTTX
-# error LV_USE_NUTTX must not be enabled for DPF builds
+# error LV_USE_NUTTX must not be enabled for DAF builds
 #endif
 
 #if defined(LV_USE_SDL) && LV_USE_SDL
-# error LV_USE_SDL must not be enabled for DPF builds
+# error LV_USE_SDL must not be enabled for DAF builds
 #endif
 
 #if defined(LV_USE_WINDOWS) && LV_USE_WINDOWS
-# error LV_USE_WINDOWS must not be enabled for DPF builds
+# error LV_USE_WINDOWS must not be enabled for DAF builds
 #endif
 
 #if defined(LV_USE_X11) && LV_USE_X11
-# error LV_USE_X11 must not be enabled for DPF builds
+# error LV_USE_X11 must not be enabled for DAF builds
 #endif
 
 // --------------------------------------------------------------------------------------------------------------------
@@ -150,7 +150,7 @@ protected:
     struct PrivateData;
     PrivateData* const lvglData;
 
-    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(LVGLWidget)
+    DAF_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(LVGLWidget)
 };
 
 typedef LVGLWidget<SubWidget> LVGLSubWidget;

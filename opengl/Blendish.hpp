@@ -1,5 +1,5 @@
 /*
- * Blendish widgets for DPF
+ * Blendish widgets for DAF
  * Copyright (C) 2021-2022 Filipe Coelho <falktx@falktx.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any purpose with
@@ -120,7 +120,7 @@ private:
     PrivateData* const pData;
     friend class BlendishSubWidget;
 
-    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(BlendishSubWidgetSharedContext)
+    DAF_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(BlendishSubWidgetSharedContext)
 };
 
 // --------------------------------------------------------------------------------------------------------------------
@@ -191,7 +191,7 @@ private:
 
     friend class BlendishSubWidgetSharedContext;
 
-    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(BlendishSubWidget)
+    DAF_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(BlendishSubWidget)
 };
 
 // --------------------------------------------------------------------------------------------------------------------
@@ -234,7 +234,7 @@ private:
     Color color;
     int fontSize;
 
-    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(BlendishLabel)
+    DAF_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(BlendishLabel)
 };
 
 // --------------------------------------------------------------------------------------------------------------------
@@ -275,7 +275,7 @@ private:
 
     void buttonClicked(SubWidget* widget, int button) override;
 
-    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(BlendishToolButton)
+    DAF_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(BlendishToolButton)
 };
 
 // --------------------------------------------------------------------------------------------------------------------
@@ -306,7 +306,7 @@ protected:
     bool isCheckable() const noexcept { return true; }
     void setCheckable(bool) const noexcept {}
 
-    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(BlendishCheckBox)
+    DAF_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(BlendishCheckBox)
 };
 
 // --------------------------------------------------------------------------------------------------------------------
@@ -348,7 +348,7 @@ private:
 
     void buttonClicked(SubWidget* widget, int button) override;
 
-    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(BlendishButtonGroup)
+    DAF_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(BlendishButtonGroup)
 };
 
 // --------------------------------------------------------------------------------------------------------------------
@@ -385,7 +385,7 @@ private:
     friend class BlendishComboBox;
     friend class BlendishMenu;
 
-    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(BlendishMenuItem)
+    DAF_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(BlendishMenuItem)
 };
 
 // --------------------------------------------------------------------------------------------------------------------
@@ -435,7 +435,7 @@ private:
     struct CallbackComboBox;
     friend class BlendishComboBox;
 
-    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(BlendishMenu)
+    DAF_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(BlendishMenu)
 };
 
 // --------------------------------------------------------------------------------------------------------------------
@@ -494,7 +494,7 @@ private:
 
     friend class BlendishMenu;
 
-    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(BlendishComboBox)
+    DAF_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(BlendishComboBox)
 };
 
 // --------------------------------------------------------------------------------------------------------------------
@@ -527,7 +527,7 @@ protected:
 private:
     Color color;
 
-    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(BlendishColorButton)
+    DAF_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(BlendishColorButton)
 };
 
 // --------------------------------------------------------------------------------------------------------------------
@@ -570,7 +570,7 @@ protected:
     bool onScroll(const ScrollEvent& ev) override;
 
 private:
-    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(BlendishNumberField)
+    DAF_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(BlendishNumberField)
 };
 
 // --------------------------------------------------------------------------------------------------------------------
@@ -617,7 +617,7 @@ private:
     Color unitColor;
     char* unitLabel;
 
-    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(BlendishKnob)
+    DAF_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(BlendishKnob)
 };
 
 // --------------------------------------------------------------------------------------------------------------------
@@ -637,7 +637,7 @@ protected:
     uint getMinimumWidth() const noexcept override;
     void onBlendishDisplay() override;
 
-    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(BlendishNode)
+    DAF_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(BlendishNode)
 };
 
 // --------------------------------------------------------------------------------------------------------------------

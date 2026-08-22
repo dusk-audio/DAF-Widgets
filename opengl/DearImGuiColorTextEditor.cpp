@@ -1,5 +1,5 @@
 /*
- * Syntax highlighting text editor (for ImGui in DPF)
+ * Syntax highlighting text editor (for ImGui in DAF)
  * Copyright (C) 2021-2023 Filipe Coelho <falktx@falktx.com>
  * Copyright (c) 2017 BalazsJako
  *
@@ -132,7 +132,7 @@ struct ImGuiTextEditor<BaseWidget>::TextEditorPrivateData {
         }
     }
 
-    DISTRHO_DECLARE_NON_COPYABLE(TextEditorPrivateData)
+    DAF_DECLARE_NON_COPYABLE(TextEditorPrivateData)
 };
 
 // --------------------------------------------------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 /*
- * Blendish widgets for DPF
+ * Blendish widgets for DAF
  * Copyright (C) 2021-2022 Filipe Coelho <falktx@falktx.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any purpose with
@@ -16,7 +16,7 @@
 
 #include "Blendish.hpp"
 
-// import DPF nanovg copy
+// import DAF nanovg copy
 #include "src/nanovg/nanovg.h"
 
 // now we can use blendish
@@ -808,7 +808,7 @@ struct BlendishMenuItem::CallbackComboBox : ButtonEventHandler::Callback
         menu.hide();
 
         BlendishMenuItem* const menuItem = dynamic_cast<BlendishMenuItem*>(widget);
-        DISTRHO_SAFE_ASSERT_RETURN(menuItem != nullptr,);
+        DAF_SAFE_ASSERT_RETURN(menuItem != nullptr,);
 
         comboBox->setCurrentMenuItem(menuItem, true);
         menuItem->triggerUserCallback(widget, button);
@@ -928,7 +928,7 @@ BlendishMenu::BlendishMenu(SubWidget* const parent)
 
 BlendishMenuItem* BlendishMenu::addMenuItem(const char* const label)
 {
-    DISTRHO_SAFE_ASSERT_RETURN(label != nullptr && label[0] != '\0', nullptr);
+    DAF_SAFE_ASSERT_RETURN(label != nullptr && label[0] != '\0', nullptr);
 
     BlendishMenuItem* const item = new BlendishMenuItem(this, label);
 
@@ -1189,7 +1189,7 @@ void BlendishComboBox::setCurrentLabel(const char* const label)
 
 void BlendishComboBox::setCurrentMenuItem(BlendishMenuItem* const menuItem, const bool triggerCallback)
 {
-    DISTRHO_SAFE_ASSERT_RETURN(menuItem != nullptr,);
+    DAF_SAFE_ASSERT_RETURN(menuItem != nullptr,);
 
     int index = 0;
     for (std::vector<BlendishMenuItem*>::iterator it = menu.items.begin(); it != menu.items.end(); ++it, ++index)

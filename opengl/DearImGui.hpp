@@ -1,5 +1,5 @@
 /*
- * Dear ImGui for DPF
+ * Dear ImGui for DAF
  * Copyright (C) 2021 Jean Pierre Cimalando <jp-dev@inbox.ru>
  * Copyright (C) 2021-2024 Filipe Coelho <falktx@falktx.com>
  *
@@ -31,11 +31,11 @@
 #include "DearImGuiToggle/imgui_toggle_presets.h"
 #include "DearImGuiToggle/imgui_toggle_renderer.h"
 
-#ifdef DISTRHO_UI_HPP_INCLUDED
-START_NAMESPACE_DISTRHO
+#ifdef DAF_UI_HPP_INCLUDED
+START_NAMESPACE_DAF
 class UI;
 class UIExporter;
-END_NAMESPACE_DISTRHO
+END_NAMESPACE_DAF
 #endif
 
 START_NAMESPACE_DGL
@@ -106,12 +106,12 @@ protected:
     struct PrivateData;
     PrivateData* const imData;
 
-#ifdef DISTRHO_UI_HPP_INCLUDED
-    friend class DISTRHO_NAMESPACE::UI;
-    friend class DISTRHO_NAMESPACE::UIExporter;
+#ifdef DAF_UI_HPP_INCLUDED
+    friend class DAF_NAMESPACE::UI;
+    friend class DAF_NAMESPACE::UIExporter;
 #endif
 
-    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ImGuiWidget)
+    DAF_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ImGuiWidget)
 };
 
 typedef ImGuiWidget<SubWidget> ImGuiSubWidget;

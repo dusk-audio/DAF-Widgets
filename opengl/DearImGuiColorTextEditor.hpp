@@ -1,5 +1,5 @@
 /*
- * Syntax highlighting text editor (for ImGui in DPF)
+ * Syntax highlighting text editor (for ImGui in DAF)
  * Copyright (C) 2021-2023 Filipe Coelho <falktx@falktx.com>
  * Copyright (c) 2017 BalazsJako
  *
@@ -85,7 +85,7 @@ private:
     TextEditorPrivateData* const teData;
     friend class ImGuiTextEditorStandaloneWindow;
 
-    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ImGuiTextEditor)
+    DAF_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ImGuiTextEditor)
 };
 
 typedef ImGuiTextEditor<ImGuiSubWidget> ImGuiTextEditorSubWidget;
@@ -124,7 +124,7 @@ protected:
     /** @internal */
     void onFileSelected(const char* filename) override;
 
-    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ImGuiTextEditorStandaloneWindow)
+    DAF_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ImGuiTextEditorStandaloneWindow)
 };
 
 // --------------------------------------------------------------------------------------------------------------------

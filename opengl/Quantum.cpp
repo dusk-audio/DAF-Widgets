@@ -1,5 +1,5 @@
 /*
- * Quanta-inspired widgets for DPF
+ * Quanta-inspired widgets for DAF
  * Copyright (C) 2022-2025 Filipe Coelho <falktx@falktx.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any purpose with
@@ -17,7 +17,7 @@
 #include "Quantum.hpp"
 #include "NanoVG.hpp"
 #include "Application.hpp"
-#include "DistrhoUtils.hpp"
+#include "DafUtils.hpp"
 
 #include <cmath>
 
@@ -1273,7 +1273,7 @@ void QuantumValueMeter::setOrientation(const Orientation orientation2)
 
 void QuantumValueMeter::setRange(const float min, const float max)
 {
-    DISTRHO_SAFE_ASSERT_RETURN(max > min,);
+    DAF_SAFE_ASSERT_RETURN(max > min,);
 
     minimum = min;
     maximum = max;
@@ -1852,8 +1852,8 @@ void QuantumStereoLevelMeter::idleCallback()
     const double time = app.getTime(); // in seconds
 
     // TESTING
-    DISTRHO_SAFE_ASSERT_RETURN(falloffL >= valueL,);
-    DISTRHO_SAFE_ASSERT_RETURN(falloffR >= valueR,);
+    DAF_SAFE_ASSERT_RETURN(falloffL >= valueL,);
+    DAF_SAFE_ASSERT_RETURN(falloffR >= valueR,);
 
     constexpr const double secondsToWaitForFalloffStart = 2;
     constexpr const double falloffDbPerSecond = 8.6;
@@ -2217,8 +2217,8 @@ void QuantumStereoLevelMeterWithLUFS::idleCallback()
     const double time = app.getTime(); // in seconds
 
     // TESTING
-    DISTRHO_SAFE_ASSERT_RETURN(falloffL >= valueL,);
-    DISTRHO_SAFE_ASSERT_RETURN(falloffR >= valueR,);
+    DAF_SAFE_ASSERT_RETURN(falloffL >= valueL,);
+    DAF_SAFE_ASSERT_RETURN(falloffR >= valueR,);
 
     constexpr const double secondsToWaitForFalloffStart = 2;
     constexpr const double falloffDbPerSecond = 8.6;

@@ -1,5 +1,5 @@
 /*
- * Dear ImGui for DPF
+ * Dear ImGui for DAF
  * Copyright (C) 2021 Jean Pierre Cimalando <jp-dev@inbox.ru>
  * Copyright (C) 2021-2025 Filipe Coelho <falktx@falktx.com>
  *
@@ -35,7 +35,7 @@
 #endif
 
 #ifndef IMGUI_SKIP_IMPLEMENTATION
-# define IMGUI_DPF_BACKEND
+# define IMGUI_DAF_BACKEND
 # include "DearImGui/imgui.cpp"
 # include "DearImGui/imgui_demo.cpp"
 # include "DearImGui/imgui_draw.cpp"
@@ -75,8 +75,8 @@ static const char* GetClipboardTextFn(void* const userData)
 static void SetClipboardTextFn(void* const userData, const char* const text)
 {
     TopLevelWidget* const tlw = static_cast<TopLevelWidget*>(userData);
-    DISTRHO_SAFE_ASSERT_RETURN(tlw!= nullptr,);
-    DISTRHO_SAFE_ASSERT_RETURN(text != nullptr,);
+    DAF_SAFE_ASSERT_RETURN(tlw!= nullptr,);
+    DAF_SAFE_ASSERT_RETURN(text != nullptr,);
 
     tlw->setClipboard(nullptr, text, std::strlen(text)+1);
 }
@@ -113,7 +113,7 @@ struct ImGuiWidget<BaseWidget>::PrivateData {
         style.ScaleAllSizes(scaleFactor);
 
        #ifndef DGL_NO_SHARED_RESOURCES
-        using namespace dpf_resources;
+        using namespace daf_resources;
         ImFontConfig fc;
         fc.FontDataOwnedByAtlas = false;
         fc.OversampleH = 1;
@@ -180,7 +180,7 @@ struct ImGuiWidget<BaseWidget>::PrivateData {
         lastModifiers = mods;
     }
 
-    DISTRHO_DECLARE_NON_COPYABLE(PrivateData)
+    DAF_DECLARE_NON_COPYABLE(PrivateData)
 };
 
 // --------------------------------------------------------------------------------------------------------------------
@@ -194,7 +194,7 @@ void ImGuiWidget<BaseWidget>::setFontSize(const float fontSize)
     const double scaleFactor = BaseWidget::getTopLevelWidget()->getScaleFactor();
 
    #ifndef DGL_NO_SHARED_RESOURCES
-    using namespace dpf_resources;
+    using namespace daf_resources;
     ImFontConfig fc;
     fc.FontDataOwnedByAtlas = false;
     fc.OversampleH = 1;

@@ -1,20 +1,20 @@
 #!/usr/bin/make -f
-# Makefile for DPF-Widgets #
+# Makefile for DAF-Widgets #
 # ------------------------ #
 # Created by falkTX
 #
 
-DPF_DIR = ../../DPF
-ifeq (,$(wildcard $(DPF_DIR)))
-DPF_DIR = ../../dpf
+DAF_DIR = ../../DAF
+ifeq (,$(wildcard $(DAF_DIR)))
+DAF_DIR = ../../dpf
 endif
 
-include $(DPF_DIR)/Makefile.base.mk
+include $(DAF_DIR)/Makefile.base.mk
 
 # ---------------------------------------------------------------------------------------------------------------------
 
 BUILD_CXX_FLAGS += $(DGL_FLAGS) -DDONT_SET_USING_DGL_NAMESPACE
-BUILD_CXX_FLAGS += -I$(DPF_DIR)/dgl -I../opengl
+BUILD_CXX_FLAGS += -I$(DAF_DIR)/dgl -I../opengl
 
 CAIRO_FLAGS += -DDGL_CAIRO -I../cairo
 OPENGL_FLAGS += -DDGL_OPENGL -I../opengl
@@ -36,34 +36,34 @@ clean:
 
 # ---------------------------------------------------------------------------------------------------------------------
 
-.PHONY: $(DPF_DIR)/build/libdgl-cairo.a
-.PHONY: $(DPF_DIR)/build/libdgl-opengl.a
-.PHONY: $(DPF_DIR)/build/libdgl-stub.a
-.PHONY: $(DPF_DIR)/build/libdgl-vulkan.a
+.PHONY: $(DAF_DIR)/build/libdgl-cairo.a
+.PHONY: $(DAF_DIR)/build/libdgl-opengl.a
+.PHONY: $(DAF_DIR)/build/libdgl-stub.a
+.PHONY: $(DAF_DIR)/build/libdgl-vulkan.a
 
-$(DPF_DIR)/build/libdgl-cairo.a:
-	$(MAKE) -C $(DPF_DIR)/dgl ../build/libdgl-cairo.a
+$(DAF_DIR)/build/libdgl-cairo.a:
+	$(MAKE) -C $(DAF_DIR)/dgl ../build/libdgl-cairo.a
 
-$(DPF_DIR)/build/libdgl-opengl.a:
-	$(MAKE) -C $(DPF_DIR)/dgl ../build/libdgl-opengl.a
+$(DAF_DIR)/build/libdgl-opengl.a:
+	$(MAKE) -C $(DAF_DIR)/dgl ../build/libdgl-opengl.a
 
-$(DPF_DIR)/build/libdgl-stub.a:
-	$(MAKE) -C $(DPF_DIR)/dgl ../build/libdgl-stub.a
+$(DAF_DIR)/build/libdgl-stub.a:
+	$(MAKE) -C $(DAF_DIR)/dgl ../build/libdgl-stub.a
 
-$(DPF_DIR)/build/libdgl-vulkan.a:
-	$(MAKE) -C $(DPF_DIR)/dgl ../build/libdgl-vulkan.a
+$(DAF_DIR)/build/libdgl-vulkan.a:
+	$(MAKE) -C $(DAF_DIR)/dgl ../build/libdgl-vulkan.a
 
 # ---------------------------------------------------------------------------------------------------------------------
 
-imgui$(APP_EXT): imgui.cpp.o imgui-src.cpp.o $(DPF_DIR)/build/libdgl-opengl.a
+imgui$(APP_EXT): imgui.cpp.o imgui-src.cpp.o $(DAF_DIR)/build/libdgl-opengl.a
 	@echo "Linking $@"
 	$(SILENT)$(CXX) $^ $(LINK_FLAGS) $(DGL_SYSTEM_LIBS) $(OPENGL_LIBS) -o $@
 
-opengl$(APP_EXT): opengl.cpp.o imgui-src.cpp.o $(DPF_DIR)/build/libdgl-opengl.a
+opengl$(APP_EXT): opengl.cpp.o imgui-src.cpp.o $(DAF_DIR)/build/libdgl-opengl.a
 	@echo "Linking $@"
 	$(SILENT)$(CXX) $^ $(LINK_FLAGS) $(DGL_SYSTEM_LIBS) $(OPENGL_LIBS) -o $@
 
-textedit$(APP_EXT): textedit.cpp.o imgui-src.cpp.o $(DPF_DIR)/build/libdgl-opengl.a
+textedit$(APP_EXT): textedit.cpp.o imgui-src.cpp.o $(DAF_DIR)/build/libdgl-opengl.a
 	@echo "Linking $@"
 	$(SILENT)$(CXX) $^ $(LINK_FLAGS) $(DGL_SYSTEM_LIBS) $(OPENGL_LIBS) -o $@
 

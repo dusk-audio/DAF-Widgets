@@ -1,5 +1,5 @@
 /*
- * Resize handle for DPF
+ * Resize handle for DAF
  * Copyright (C) 2021-2025 Filipe Coelho <falktx@falktx.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any purpose with
@@ -25,7 +25,7 @@
 
 START_NAMESPACE_DGL
 
-/** Resize handle for DPF windows, will sit on bottom-right. */
+/** Resize handle for DAF windows, will sit on bottom-right. */
 class ResizeHandle : public TopLevelWidget
 {
 public:
@@ -210,7 +210,7 @@ private:
         l3.setEndPos(x + offset, y + linesize + offset);
     }
 
-    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ResizeHandle)
+    DAF_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ResizeHandle)
 };
 
 END_NAMESPACE_DGL

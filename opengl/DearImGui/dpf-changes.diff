@@ -6,7 +6,7 @@ index 2a255be..3d30626 100644
      glShadeModel(GL_SMOOTH);
      glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
  
-+#ifndef IMGUI_DPF_BACKEND
++#ifndef IMGUI_DAF_BACKEND
      // If you are using this code with non-legacy OpenGL header/contexts (which you should not, prefer using imgui_impl_opengl3.cpp!!),
      // you may need to backup/reset/restore other state, e.g. for current shader using the commented lines below.
      // (DO NOT MODIFY THIS FILE! Add the code in your calling function)
@@ -30,7 +30,7 @@ index 7d0b536..c559ba7 100644
  
      // Setup viewport, orthographic projection matrix
      // Our visible imgui space lies from draw_data->DisplayPos (top left) to draw_data->DisplayPos+data_data->DisplaySize (bottom right). DisplayPos is (0,0) for single viewport apps.
-+#ifdef IMGUI_DPF_BACKEND
++#ifdef IMGUI_DAF_BACKEND
 +    GL_CALL(glViewport(-draw_data->DisplayPos.x, draw_data->DisplayPos.y, (GLsizei)fb_width, (GLsizei)fb_height));
 +    float L = 0;
 +    float R = draw_data->DisplaySize.x;

@@ -210,7 +210,7 @@ public:
         setGeometryConstraints(kMinWindowWidth * scaleFactor, kMinWindowHeight * scaleFactor, false, false);
         setSize(kMinWindowWidth * scaleFactor, kMinWindowHeight * scaleFactor);
         setResizable(true);
-        setTitle("DPF Widgets Demo");
+        setTitle("DAF Widgets Demo");
 
         const ScopedGraphicsContext sgc(*this);
         createAndAddWidgetOfType<BlendishDemo>(margin, 0, 0, 0);

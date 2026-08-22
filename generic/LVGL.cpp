@@ -1,5 +1,5 @@
 /*
- * LVGL for DPF
+ * LVGL for DAF
  * Copyright (C) 2024-2025 Filipe Coelho <falktx@falktx.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any purpose with
@@ -22,12 +22,12 @@
 # include "OpenGL.hpp"
 #endif
 
-#include "../distrho/extra/RingBuffer.hpp"
-#include "../distrho/extra/Sleep.hpp"
-#include "../distrho/extra/Time.hpp"
+#include "../daf/extra/RingBuffer.hpp"
+#include "../daf/extra/Sleep.hpp"
+#include "../daf/extra/Time.hpp"
 
 // NOTE only valid for OpenGL
-// #define DPF_LVGL_AUTO_SCALING
+// #define DAF_LVGL_AUTO_SCALING
 
 START_NAMESPACE_DGL
 
@@ -82,10 +82,10 @@ private:
     void init()
     {
         lv_init();
-        lv_delay_set_cb(DISTRHO_NAMESPACE::d_msleep);
-        lv_tick_set_cb(DISTRHO_NAMESPACE::d_gettime_ms);
+        lv_delay_set_cb(DAF_NAMESPACE::d_msleep);
+        lv_tick_set_cb(DAF_NAMESPACE::d_gettime_ms);
 
-       #ifdef DPF_LVGL_AUTO_SCALING
+       #ifdef DAF_LVGL_AUTO_SCALING
         static constexpr const int scaleFactor = 1;
        #else
         const double scaleFactor = self->getTopLevelWidget()->getScaleFactor();
@@ -96,7 +96,7 @@ private:
         lv_area_set(&updatedArea, 0, 0, width, height);
 
         display = lv_display_create(width, height);
-        DISTRHO_SAFE_ASSERT_RETURN(display != nullptr,);
+        DAF_SAFE_ASSERT_RETURN(display != nullptr,);
 
         lv_display_set_dpi(display, LV_DPI_DEF * scaleFactor);
 
@@ -144,7 +144,7 @@ private:
 
       #ifdef DGL_OPENGL
         glGenTextures(1, &textureId);
-        DISTRHO_SAFE_ASSERT_RETURN(textureId != 0,);
+        DAF_SAFE_ASSERT_RETURN(textureId != 0,);
 
        #ifndef DGL_USE_OPENGL3
         glEnable(GL_TEXTURE_2D);
@@ -237,7 +237,7 @@ private:
         const uint32_t data_size = stride * height;
 
         textureData = static_cast<uint8_t*>(std::realloc(textureData, data_size));
-        DISTRHO_SAFE_ASSERT_RETURN(textureData != nullptr,);
+        DAF_SAFE_ASSERT_RETURN(textureData != nullptr,);
 
         std::memset(textureData, 0, data_size);
 
@@ -247,7 +247,7 @@ private:
        #ifdef DGL_CAIRO
         cairo_surface_destroy(surface);
         surface = cairo_image_surface_create_for_data(textureData, CAIRO_FORMAT_ARGB32, width, height, stride);
-        DISTRHO_SAFE_ASSERT(surface != nullptr);
+        DAF_SAFE_ASSERT(surface != nullptr);
        #endif
     }
 
@@ -272,7 +272,7 @@ private:
         PrivateData* const evthis = static_cast<PrivateData*>(lv_display_get_driver_data(evdisplay));
 
        #if defined(DGL_USE_GLES) && (LV_COLOR_DEPTH == 32 || LV_COLOR_DEPTH == 24)
-        DISTRHO_SAFE_ASSERT_RETURN(data != nullptr,);
+        DAF_SAFE_ASSERT_RETURN(data != nullptr,);
 
         const lv_color_format_t lvformat = lv_display_get_color_format(evdisplay);
         const uint32_t width = lv_display_get_horizontal_resolution(evdisplay);
@@ -351,7 +351,7 @@ private:
         evthis->mouseWheelDelta = 0.0;
     }
 
-    DISTRHO_DECLARE_NON_COPYABLE(PrivateData)
+    DAF_DECLARE_NON_COPYABLE(PrivateData)
 };
 
 // --------------------------------------------------------------------------------------------------------------------
@@ -369,15 +369,15 @@ void LVGLWidget<BaseWidget>::onDisplay()
     const int32_t fullwidth = static_cast<int32_t>(BaseWidget::getWidth());
     const int32_t fullheight = static_cast<int32_t>(BaseWidget::getHeight());
 
-   #ifdef DPF_LVGL_AUTO_SCALING
+   #ifdef DAF_LVGL_AUTO_SCALING
     const double scaleFactor = BaseWidget::getTopLevelWidget()->getScaleFactor();
     const int32_t width = d_roundToIntPositive(fullwidth / scaleFactor);
     const int32_t height = d_roundToIntPositive(fullheight / scaleFactor);
 
-    DISTRHO_SAFE_ASSERT_RETURN(width == static_cast<int32_t>(lvglData->textureSize.getWidth()),);
-    DISTRHO_SAFE_ASSERT_RETURN(height == static_cast<int32_t>(lvglData->textureSize.getHeight()),);
+    DAF_SAFE_ASSERT_RETURN(width == static_cast<int32_t>(lvglData->textureSize.getWidth()),);
+    DAF_SAFE_ASSERT_RETURN(height == static_cast<int32_t>(lvglData->textureSize.getHeight()),);
    #else
-    DISTRHO_SAFE_ASSERT_RETURN(BaseWidget::getSize() == lvglData->textureSize,);
+    DAF_SAFE_ASSERT_RETURN(BaseWidget::getSize() == lvglData->textureSize,);
 
     const int32_t width = fullwidth;
     const int32_t height = fullheight;
@@ -647,7 +647,7 @@ bool LVGLWidget<BaseWidget>::onMotion(const Widget::MotionEvent& event)
     if (BaseWidget::onMotion(event))
         return true;
 
-   #ifdef DPF_LVGL_AUTO_SCALING
+   #ifdef DAF_LVGL_AUTO_SCALING
     const double scaleFactor = BaseWidget::getTopLevelWidget()->getScaleFactor();
    #else
     static constexpr const int scaleFactor = 1;
@@ -666,7 +666,7 @@ bool LVGLWidget<SubWidget>::onMotion(const Widget::MotionEvent& event)
     if (!getAbsoluteArea().contains(event.absolutePos))
         return false;
 
-   #ifdef DPF_LVGL_AUTO_SCALING
+   #ifdef DAF_LVGL_AUTO_SCALING
     const double scaleFactor = getTopLevelWidget()->getScaleFactor();
    #else
     static constexpr const int scaleFactor = 1;
@@ -682,7 +682,7 @@ bool LVGLWidget<BaseWidget>::onScroll(const Widget::ScrollEvent& event)
     if (BaseWidget::onScroll(event))
         return true;
 
-   #ifdef DPF_LVGL_AUTO_SCALING
+   #ifdef DAF_LVGL_AUTO_SCALING
     const double scaleFactor = BaseWidget::getTopLevelWidget()->getScaleFactor();
    #else
     static constexpr const int scaleFactor = 1;
@@ -700,7 +700,7 @@ bool LVGLWidget<SubWidget>::onScroll(const Widget::ScrollEvent& event)
     if (!getAbsoluteArea().contains(event.absolutePos))
         return false;
 
-   #ifdef DPF_LVGL_AUTO_SCALING
+   #ifdef DAF_LVGL_AUTO_SCALING
     const double scaleFactor = getTopLevelWidget()->getScaleFactor();
    #else
     static constexpr const int scaleFactor = 1;
@@ -717,7 +717,7 @@ void LVGLWidget<BaseWidget>::onResize(const Widget::ResizeEvent& event)
     if (lvglData->display == nullptr)
         return;
 
-   #ifdef DPF_LVGL_AUTO_SCALING
+   #ifdef DAF_LVGL_AUTO_SCALING
     const double scaleFactor = BaseWidget::getTopLevelWidget()->getScaleFactor();
     const uint width = d_roundToUnsignedInt(event.size.getWidth() / scaleFactor);
     const uint height = d_roundToUnsignedInt(event.size.getHeight() / scaleFactor);
@@ -822,7 +822,7 @@ END_NAMESPACE_DGL
 
 lv_global_t* lv_global_default()
 {
-	DISTRHO_SAFE_ASSERT(DGL_NAMESPACE::lv_global != nullptr);
+	DAF_SAFE_ASSERT(DGL_NAMESPACE::lv_global != nullptr);
     return DGL_NAMESPACE::lv_global;
 }
 

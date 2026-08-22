@@ -15,7 +15,7 @@
  */
 
 // ImGui is quite large, build it separately
-#define IMGUI_DPF_BACKEND
+#define IMGUI_DAF_BACKEND
 #include "../opengl/DearImGui/imgui.cpp"
 #include "../opengl/DearImGui/imgui_demo.cpp"
 #include "../opengl/DearImGui/imgui_draw.cpp"

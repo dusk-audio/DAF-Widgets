@@ -1,5 +1,5 @@
 /*
- * Quanta-inspired widgets for DPF
+ * Quanta-inspired widgets for DAF
  * Copyright (C) 2022-2025 Filipe Coelho <falktx@falktx.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any purpose with
@@ -181,7 +181,7 @@ protected:
     bool onMouse(const MouseEvent& ev) override;
     bool onMotion(const MotionEvent& ev) override;
 
-    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(QuantumButton)
+    DAF_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(QuantumButton)
 };
 
 // --------------------------------------------------------------------------------------------------------------------
@@ -229,7 +229,7 @@ public:
 protected:
     void onNanoDisplay() override;
 
-    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(QuantumLabel)
+    DAF_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(QuantumLabel)
 };
 
 // --------------------------------------------------------------------------------------------------------------------
@@ -246,7 +246,7 @@ public:
 protected:
     void onNanoDisplay() override;
 
-    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AbstractQuantumSeparatorLine)
+    DAF_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AbstractQuantumSeparatorLine)
 };
 
 typedef AbstractQuantumSeparatorLine<true> QuantumHorizontalSeparatorLine;
@@ -263,7 +263,7 @@ public:
 protected:
     void onDisplay() override;
 
-    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(QuantumSpacer)
+    DAF_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(QuantumSpacer)
 };
 
 // --------------------------------------------------------------------------------------------------------------------
@@ -295,7 +295,7 @@ protected:
     bool onMouse(const MouseEvent& ev) override;
     bool onMotion(const MotionEvent& ev) override;
 
-    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AbstractQuantumSwitch)
+    DAF_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AbstractQuantumSwitch)
 };
 
 typedef AbstractQuantumSwitch<false> QuantumSwitch;
@@ -327,7 +327,7 @@ protected:
     bool onMouse(const MouseEvent& ev) override;
     bool onMotion(const MotionEvent& ev) override;
 
-    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(QuantumRadioSwitch)
+    DAF_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(QuantumRadioSwitch)
 };
 
 // --------------------------------------------------------------------------------------------------------------------
@@ -352,7 +352,7 @@ protected:
     bool onMouse(const MouseEvent& ev) override;
     bool onMotion(const MotionEvent& ev) override;
 
-    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(QuantumDualSidedSwitch)
+    DAF_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(QuantumDualSidedSwitch)
 };
 */
 
@@ -413,7 +413,7 @@ private:
     uint sidelabelsFontSize = theme.fontSize;
     uint valueFontSize = small ? theme.fontSize * 0.75 : theme.fontSize * 2;
 
-    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AbstractQuantumKnob)
+    DAF_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AbstractQuantumKnob)
 };
 
 typedef AbstractQuantumKnob<false, false> QuantumKnob;
@@ -440,7 +440,7 @@ protected:
     bool onMouse(const MouseEvent& ev) override;
     bool onMotion(const MotionEvent& ev) override;
 
-    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(QuantumMixerSlider)
+    DAF_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(QuantumMixerSlider)
 };
 
 // --------------------------------------------------------------------------------------------------------------------
@@ -475,7 +475,7 @@ public:
 protected:
     void onNanoDisplay() override;
 
-    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AbstractQuantumGainReductionMeter)
+    DAF_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AbstractQuantumGainReductionMeter)
 };
 
 typedef AbstractQuantumGainReductionMeter<false> QuantumGainReductionMeter;
@@ -542,7 +542,7 @@ protected:
     bool valueCentered = false;
     char* valueFormat = nullptr;
 
-    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(QuantumValueMeter)
+    DAF_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(QuantumValueMeter)
 };
 
 // --------------------------------------------------------------------------------------------------------------------
@@ -587,7 +587,7 @@ protected:
     bool onMotion(const MotionEvent& ev) override;
     bool onScroll(const ScrollEvent& ev) override;
 
-    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(QuantumValueSlider)
+    DAF_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(QuantumValueSlider)
 };
 
 // --------------------------------------------------------------------------------------------------------------------
@@ -601,7 +601,7 @@ public:
 protected:
     void onNanoDisplay() override;
 
-    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(QuantumLevelMeter)
+    DAF_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(QuantumLevelMeter)
 };
 
 // --------------------------------------------------------------------------------------------------------------------
@@ -650,7 +650,7 @@ protected:
     void onNanoDisplay() override;
     void idleCallback() override;
 
-    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(QuantumStereoLevelMeter)
+    DAF_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(QuantumStereoLevelMeter)
 };
 
 // --------------------------------------------------------------------------------------------------------------------
@@ -703,7 +703,7 @@ protected:
     void onNanoDisplay() override;
     void idleCallback() override;
 
-    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(QuantumStereoLevelMeterWithLUFS)
+    DAF_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(QuantumStereoLevelMeterWithLUFS)
 };
 
 // --------------------------------------------------------------------------------------------------------------------
@@ -734,7 +734,7 @@ protected:
 private:
     uint offset = 0;
 
-    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AbstractQuantumFrame)
+    DAF_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AbstractQuantumFrame)
 };
 
 typedef AbstractQuantumFrame<char> QuantumFrame;
