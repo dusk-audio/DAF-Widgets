@@ -26,10 +26,11 @@ endif
 
 # ---------------------------------------------------------------------------------------------------------------------
 
-all: imgui$(APP_EXT) opengl$(APP_EXT) textedit$(APP_EXT)
+all: duskwidgets$(APP_EXT) imgui$(APP_EXT) opengl$(APP_EXT) textedit$(APP_EXT)
 
 clean:
 	rm -f *.d *.o *.js *.html *.wasm
+	rm -f duskwidgets$(APP_EXT)
 	rm -f imgui$(APP_EXT)
 	rm -f opengl$(APP_EXT)
 	rm -f textedit$(APP_EXT)
@@ -55,6 +56,10 @@ $(DAF_DIR)/build/libdgl-vulkan.a:
 
 # ---------------------------------------------------------------------------------------------------------------------
 
+duskwidgets$(APP_EXT): duskwidgets.cpp.o duskwidgets-src.cpp.o imgui-src.cpp.o $(DAF_DIR)/build/libdgl-opengl.a
+	@echo "Linking $@"
+	$(SILENT)$(CXX) $^ $(LINK_FLAGS) $(DGL_SYSTEM_LIBS) $(OPENGL_LIBS) -o $@
+
 imgui$(APP_EXT): imgui.cpp.o imgui-src.cpp.o $(DAF_DIR)/build/libdgl-opengl.a
 	@echo "Linking $@"
 	$(SILENT)$(CXX) $^ $(LINK_FLAGS) $(DGL_SYSTEM_LIBS) $(OPENGL_LIBS) -o $@
@@ -68,6 +73,14 @@ textedit$(APP_EXT): textedit.cpp.o imgui-src.cpp.o $(DAF_DIR)/build/libdgl-openg
 	$(SILENT)$(CXX) $^ $(LINK_FLAGS) $(DGL_SYSTEM_LIBS) $(OPENGL_LIBS) -o $@
 
 # ---------------------------------------------------------------------------------------------------------------------
+
+duskwidgets.cpp.o: duskwidgets.cpp
+	@echo "Compiling $<"
+	$(SILENT)$(CXX) $< $(BUILD_CXX_FLAGS) $(OPENGL_FLAGS) -c -o $@
+
+duskwidgets-src.cpp.o: ../opengl/DuskWidgets.cpp
+	@echo "Compiling $<"
+	$(SILENT)$(CXX) $< $(BUILD_CXX_FLAGS) $(OPENGL_FLAGS) -c -o $@
 
 imgui.cpp.o: imgui.cpp
 	@echo "Compiling $<"
@@ -88,6 +101,8 @@ textedit.cpp.o: textedit.cpp
 # ---------------------------------------------------------------------------------------------------------------------
 
 -include cairo.cpp.d
+-include duskwidgets.cpp.d
+-include duskwidgets-src.cpp.d
 -include imgui.cpp.d
 -include imgui-src.cpp.d
 -include opengl.cpp.d
