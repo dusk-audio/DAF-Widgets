@@ -616,6 +616,7 @@ ImGuiWidget<StandaloneWindow>::ImGuiWidget(Application& app, const float fontSiz
       imData(new PrivateData(this, fontSize))
 {
     Window::addIdleCallback(this, 1000 / 60); // 60 fps
+    done();
 }
 
 template <>
@@ -624,6 +625,7 @@ ImGuiWidget<StandaloneWindow>::ImGuiWidget(Application& app, Window& transientPa
       imData(new PrivateData(this, fontSize))
 {
     Window::addIdleCallback(this, 1000 / 60); // 60 fps
+    done();
 }
 
 template <>

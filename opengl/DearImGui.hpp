@@ -69,11 +69,17 @@ public:
 
    /**
       Constructor for a ImGuiStandaloneWindow without transient parent window.
+      @note StandaloneWindow::done() is called at the end of this constructor,
+            so a subclass doing graphics work in its own constructor must ask for a
+            context again with StandaloneWindow::reinit().
     */
     explicit ImGuiWidget(Application& app, float fontSize = 13.f);
 
    /**
       Constructor for a ImGuiStandaloneWindow with transient parent window.
+      @note StandaloneWindow::done() is called at the end of this constructor,
+            so a subclass doing graphics work in its own constructor must ask for a
+            context again with StandaloneWindow::reinit().
     */
     explicit ImGuiWidget(Application& app, Window& transientParentWindow, float fontSize = 13.f);
 
