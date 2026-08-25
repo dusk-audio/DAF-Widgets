@@ -110,17 +110,29 @@ Range Range::withMidPoint(const float s, const float e, const float valueAtCentr
     return r;
 }
 
+// clamp01 cannot stop a NaN - both of its comparisons are false for one - and a NaN
+// position reaches the vertex buffer, where it is undefined at rasterisation. A range
+// whose ends meet divides by zero, which a host that publishes placeholder parameter
+// metadata hands over routinely, and a skew at or below zero sends pow out of [0,1].
+// Anything that is not a drawable fraction becomes the bottom of the range here.
+static float asFraction(const float v) noexcept
+{
+    return (v >= 0.0f && v <= 1.0f) ? v : 0.0f;
+}
+
 float Range::toNorm(const float value) const noexcept
 {
-    const float c = clamp01((value - start) / (end - start));
-    return isUnity(skew) ? c : std::pow(c, skew);
+    const float span = end - start;
+    const float raw = (span < 0.0f || span > 0.0f) ? (value - start) / span : 0.0f;
+    const float c = clamp01(raw);
+    return asFraction(isUnity(skew) ? c : std::pow(c, skew));
 }
 
 float Range::fromNorm(const float norm) const noexcept
 {
     const float c = clamp01(norm);
     const float t = isUnity(skew) ? c : std::pow(c, 1.0f / skew);
-    return start + (end - start) * t;
+    return start + (end - start) * asFraction(t);
 }
 
 static const Range& defaultFaderRange()
@@ -131,8 +143,15 @@ static const Range& defaultFaderRange()
 
 // --------------------------------------------------------------------------------------------------------------------
 
-void MeterBallistics::tick(const float incomingDb, const float framesPerSourceTick) noexcept
+void MeterBallistics::tick(float incomingDb, const float framesPerSourceTick) noexcept
 {
+    // A meter is fed by someone else's DSP, and one bad sample would latch for the life
+    // of the UI: NaN fails the rising test below, so the decay folds it into displayed
+    // for good, and an infinite peak never falls back. It reads as the signal stopping
+    // rather than as a fault, because the bar clamps a NaN to silence.
+    if (!(incomingDb > -1000.0f && incomingDb < 1000.0f))
+        incomingDb = -100.0f;
+
     const float frames = framesPerSourceTick > 0.1f ? framesPerSourceTick : 1.0f;
     const float decay = 1.0f - std::pow(1.0f - 0.15f, 1.0f / frames);
 
