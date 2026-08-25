@@ -491,6 +491,28 @@ void ImGuiWidget<BaseWidget>::onResize(const Widget::ResizeEvent& event)
     io.DisplaySize.y = event.size.getHeight();
 }
 
+template <class BaseWidget>
+void ImGuiWidget<BaseWidget>::onFocusChanged(const Widget::FocusEvent& event)
+{
+    BaseWidget::onFocusChanged(event);
+
+    // A grab is a temporary loan of the focus, as a menu or a pointer grab does, and the window
+    // gets it back when the grab ends. Dear ImGui clears every key and mouse button on focus
+    // loss, which would cancel a drag in progress, so only a real focus change is reported.
+    if (event.mode != kCrossingNormal)
+        return;
+
+    ImGui::SetCurrentContext(imData->context);
+
+    ImGuiIO& io(ImGui::GetIO());
+    io.AddFocusEvent(event.focus);
+
+    // ImGui dropped the modifier state along with the keys, so the cache of what it was last
+    // told goes too, otherwise a modifier still held when the focus comes back is never resent.
+    if (! event.focus)
+        imData->lastModifiers = 0;
+}
+
 // --------------------------------------------------------------------------------------------------------------------
 // ImGuiSubWidget
 

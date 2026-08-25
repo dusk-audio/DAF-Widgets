@@ -102,6 +102,7 @@ protected:
     bool onMotion(const Widget::MotionEvent& event) override;
     bool onScroll(const Widget::ScrollEvent& event) override;
     void onResize(const Widget::ResizeEvent& event) override;
+    void onFocusChanged(const Widget::FocusEvent& event) override;
 
     struct PrivateData;
     PrivateData* const imData;
