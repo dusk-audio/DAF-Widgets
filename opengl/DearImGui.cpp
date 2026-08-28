@@ -497,20 +497,40 @@ void ImGuiWidget<BaseWidget>::onFocusChanged(const Widget::FocusEvent& event)
     BaseWidget::onFocusChanged(event);
 
     // A grab is a temporary loan of the focus, as a menu or a pointer grab does, and the window
-    // gets it back when the grab ends. Dear ImGui clears every key and mouse button on focus
-    // loss, which would cancel a drag in progress, so only a real focus change is reported.
+    // gets it back when the grab ends, so only a real focus change is acted on.
     if (event.mode != kCrossingNormal)
+        return;
+
+    // Gaining focus needs nothing: the key state was already cleared on the way out, and the
+    // modifier cache below makes the next key event resend whatever is still held.
+    if (event.focus)
         return;
 
     ImGui::SetCurrentContext(imData->context);
 
     ImGuiIO& io(ImGui::GetIO());
-    io.AddFocusEvent(event.focus);
 
-    // ImGui dropped the modifier state along with the keys, so the cache of what it was last
-    // told goes too, otherwise a modifier still held when the focus comes back is never resent.
-    if (! event.focus)
-        imData->lastModifiers = 0;
+    // Clear the KEYBOARD state only, and deliberately not through io.AddFocusEvent(false).
+    //
+    // What focus loss must fix is a key or modifier that was held when the window lost focus and
+    // released somewhere else: ImGui never sees the release, so it believes the key is still down
+    // and the next Ctrl-click or Shift-drag behaves as though a modifier were held.
+    //
+    // AddFocusEvent(false) does fix that, but it also makes ImGui call ClearInputMouse() at the
+    // end of the frame, which drops a held mouse button. A plugin editor embedded in a DAW does
+    // not own keyboard focus the way a standalone window does, so focus-out arrives during
+    // ordinary use, and a knob drag then dies the moment the user starts moving the pointer. That
+    // is not theoretical: it shipped, and every DAF plugin's knobs stopped turning
+    // (dusk-audio/plugins#233 follow-up). An earlier attempt tried to dodge it by filtering on the
+    // crossing mode, but kCrossingNormal is precisely the pointer-driven case that occurs mid-drag.
+    //
+    // ClearInputKeys() skips mouse keys by design (it does the ImGui::IsMouseKey(key) continue),
+    // so it clears exactly the half that needs clearing and leaves a gesture in progress alone.
+    io.ClearInputKeys();
+
+    // The cache of what ImGui was last told goes with it, otherwise a modifier still held when
+    // the focus comes back is never resent.
+    imData->lastModifiers = 0;
 }
 
 // --------------------------------------------------------------------------------------------------------------------
