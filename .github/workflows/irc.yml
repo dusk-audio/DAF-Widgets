@@ -9,9 +9,19 @@ jobs:
     steps:
       - name: Format message
         id: message
+        # Every one of these is attacker-controlled text. They reach the script through the
+        # environment and are never interpolated into it: a `run:` block is assembled by
+        # substituting the expressions as literal source before bash ever sees it, so a
+        # commit message is code at that point. An apostrophe was enough to break the build
+        # ("the caller's", "DAF's API rename"); a backtick or $(...) would have run on the
+        # runner instead.
+        env:
+          ACTOR: ${{ github.actor }}
+          COMMIT_MESSAGE: ${{ github.event.commits[0].message }}
+          COMMIT_URL: ${{ github.event.commits[0].url }}
         run: |
-          message="${{ github.actor }} pushed $(echo '${{ github.event.commits[0].message }}' | head -n 1) ${{ github.event.commits[0].url }}"
-          echo ::set-output name=message::"${message}"
+          subject="${COMMIT_MESSAGE%%$'\n'*}"
+          printf 'message=%s pushed %s %s\n' "${ACTOR}" "${subject}" "${COMMIT_URL}" >> "${GITHUB_OUTPUT}"
       - name: IRC notification
         uses: Gottox/irc-message-action@v2
         with:
