@@ -115,6 +115,34 @@ Used in:
 
 ---
 
+#### opengl / DuskWidgets
+
+![screenshot](screenshots/DuskWidgets.png)
+
+The mixing-console widget set shared by Dusk Studio and the Dusk plug-in UIs: the knob with its
+pre-rendered dome, the full-travel fader, the segmented meter, the gain-reduction column, the
+analogue needle meter, the latching button bank, the module header pill, buttons, the drag value
+bubble and the text field, plus the theme, the font baking and the shared value formatting.
+
+It is the exception to the rules below on purpose. The set is a namespace of free functions taking
+an `ImDrawList` and a `Context`, not a `SubWidget` subclass, so that a host which already has a Dear
+ImGui context can draw with it whatever windowing it runs on: Dusk Studio uses it outside DGL
+entirely. It depends on Dear ImGui only.
+
+**`opengl/DuskWidgets.cpp` has to be compiled**, alongside `opengl/DearImGui.cpp`. Including the
+header alone links only for the parts that are inline, which is none of the widgets. A CMake
+consumer adds it to the same source list its ImGui backend is in; the gallery under `tests/` is a
+worked example of the whole set, including the two calls the baked knob dome needs around
+`ImFontAtlas::Build()`.
+
+Values go in and come back out: a widget never writes through a pointer, so the caller decides
+whether a parameter lives in an atomic, in a host parameter or in a plain float.
+
+Being adopted by Dusk Studio and the Dusk plug-in fleet, which reached the same widgets
+independently and are converging on this copy.
+
+---
+
 ## Rules and Layout
 
 Each widget MUST follow these rules:

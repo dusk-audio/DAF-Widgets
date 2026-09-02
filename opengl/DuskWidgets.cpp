@@ -657,6 +657,175 @@ ButtonResult textButton(Context& ctx, const char* const id, const ImVec2 tl, con
     return result;
 }
 
+ButtonBankResult buttonBank(Context& ctx, const char* const id, const ImVec2 tl, const ImVec2 br,
+                            const char* const* const labels, const int count, const int selected,
+                            const ButtonBankStyle& style)
+{
+    ButtonBankResult result;
+
+    if (labels == nullptr || count <= 0)
+        return result;
+
+    const Theme& theme = *ctx.theme;
+    ImDrawList* const dl = ctx.dl;
+
+    const ImU32 face = style.face != 0 ? style.face : theme.buttonOff;
+    const ImU32 faceActive = style.faceActive != 0 ? style.faceActive : darker(face, 0.35f);
+    const ImU32 border = style.border != 0 ? style.border : theme.pillBorder;
+    const ImU32 tabColour = style.tab != 0 ? style.tab : theme.grHandle;
+    const ImU32 labelColour = style.label != 0 ? style.label : theme.textDim;
+    const ImU32 labelActive = style.labelActive != 0 ? style.labelActive : theme.textBright;
+    const ImU32 captionColour = style.caption != 0 ? style.caption : theme.textDim;
+
+    ImFont* const font = style.font != nullptr ? style.font
+                       : (ctx.fonts != nullptr && ctx.fonts->caption != nullptr ? ctx.fonts->caption
+                                                                               : ImGui::GetFont());
+    const float fontSize = ctx.s(style.fontSize);
+    const bool vertical = style.orientation == BankOrientation::vertical;
+
+    // The label gutter comes off the cross axis before the buttons are divided up, so a
+    // bank keeps the box it was given whichever way its labels are placed.
+    const float gutter = style.labelSide == BankLabelSide::inside ? 0.0f : ctx.s(style.labelGutter);
+    ImVec2 bankTl = tl;
+    ImVec2 bankBr = br;
+
+    if (style.labelSide == BankLabelSide::before)
+    {
+        if (vertical)
+            bankTl.x += gutter;
+        else
+            bankTl.y += gutter;
+    }
+    else if (style.labelSide == BankLabelSide::after)
+    {
+        if (vertical)
+            bankBr.x -= gutter;
+        else
+            bankBr.y -= gutter;
+    }
+
+    if (bankBr.x - bankTl.x < 2.0f || bankBr.y - bankTl.y < 2.0f)
+        return result;
+
+    if (style.captionText != nullptr)
+    {
+        const float size = ctx.s(style.captionSize);
+        text(ctx, font, size, ImVec2(tl.x, tl.y - size - ctx.s(4.0f)), br.x - tl.x, captionColour,
+             style.captionText);
+    }
+
+    const float gap = ctx.s(style.gap);
+    const float axis = vertical ? bankBr.y - bankTl.y : bankBr.x - bankTl.x;
+    const float pitch = (axis + gap) / (float) count;
+    const float length = std::max(ctx.s(2.0f), pitch - gap);
+    const float rounding = ctx.s(style.rounding);
+
+    for (int position = 0; position < count; ++position)
+    {
+        const int index = style.order != nullptr ? style.order[position] : position;
+        if (index < 0 || index >= count)
+            continue;
+
+        const float offset = (float) position * pitch;
+        const ImVec2 buttonTl = vertical ? ImVec2(bankTl.x, bankTl.y + offset)
+                                         : ImVec2(bankTl.x + offset, bankTl.y);
+        const ImVec2 buttonBr = vertical ? ImVec2(bankBr.x, buttonTl.y + length)
+                                         : ImVec2(buttonTl.x + length, bankBr.y);
+
+        // The id stack rather than a composed string, so a long caller id cannot truncate
+        // two buttons down to the same ImGui id.
+        ImGui::PushID(index);
+        const bool hovered = hitArea(ctx, id != nullptr ? id : "##bank", buttonTl, buttonBr);
+        const bool held = hovered && ImGui::IsItemActive();
+        ImGui::PopID();
+
+        const bool active = index == selected;
+
+        if (hovered)
+            result.hovered = index;
+        if (hovered && ImGui::IsMouseReleased(ImGuiMouseButton_Left))
+        {
+            result.clicked = index;
+            result.changed = !active;
+        }
+
+        const bool down = active && style.activeStyle == BankActiveStyle::pressed;
+
+        if (style.shadow && !down)
+            dl->AddRectFilled(ImVec2(buttonTl.x + ctx.s(2.0f), buttonTl.y + ctx.s(3.0f)),
+                              ImVec2(buttonBr.x + ctx.s(2.0f), buttonBr.y + ctx.s(3.0f)),
+                              IM_COL32(0, 0, 0, 130), rounding);
+
+        ImU32 fill = active ? faceActive : face;
+        if (hovered)
+            fill = brighter(fill, held ? 0.35f : 0.18f);
+        dl->AddRectFilled(buttonTl, buttonBr, fill, rounding);
+
+        // The bevel is what carries "pressed": lit along the top and left when the button
+        // stands proud, and along the bottom and right when it is pushed in.
+        const ImU32 lit = withAlpha(brighter(fill, 0.55f), 0.75f);
+        const ImU32 shade = withAlpha(darker(fill, 0.6f), 0.75f);
+        const float bevel = ctx.s(1.0f);
+        dl->AddLine(ImVec2(buttonTl.x + bevel, buttonTl.y + bevel),
+                    ImVec2(buttonBr.x - bevel, buttonTl.y + bevel), down ? shade : lit, bevel);
+        dl->AddLine(ImVec2(buttonTl.x + bevel, buttonTl.y + bevel),
+                    ImVec2(buttonTl.x + bevel, buttonBr.y - bevel), down ? shade : lit, bevel);
+        dl->AddLine(ImVec2(buttonTl.x + bevel, buttonBr.y - bevel),
+                    ImVec2(buttonBr.x - bevel, buttonBr.y - bevel), down ? lit : shade, bevel);
+        dl->AddLine(ImVec2(buttonBr.x - bevel, buttonTl.y + bevel),
+                    ImVec2(buttonBr.x - bevel, buttonBr.y - bevel), down ? lit : shade, bevel);
+
+        dl->AddRect(buttonTl, buttonBr, border, rounding, 0, ctx.s(0.9f));
+
+        if (active && style.activeStyle == BankActiveStyle::tab)
+        {
+            // A strip along the leading edge: the left of a column, the top of a row.
+            const float thickness = ctx.s(2.5f);
+            const ImVec2 stripTl(buttonTl.x + bevel, buttonTl.y + bevel);
+            const ImVec2 stripBr = vertical ? ImVec2(stripTl.x + thickness, buttonBr.y - bevel)
+                                            : ImVec2(buttonBr.x - bevel, stripTl.y + thickness);
+            dl->AddRectFilled(stripTl, stripBr, tabColour);
+        }
+
+        const ImU32 ink = active ? labelActive : labelColour;
+        const char* const label = labels[index];
+
+        switch (style.labelSide)
+        {
+        case BankLabelSide::inside:
+            text(ctx, font, fontSize,
+                 ImVec2(buttonTl.x, buttonTl.y + (buttonBr.y - buttonTl.y - fontSize) * 0.5f),
+                 buttonBr.x - buttonTl.x, ink, label);
+            break;
+
+        case BankLabelSide::before:
+            if (vertical)
+                text(ctx, font, fontSize,
+                     ImVec2(tl.x, buttonTl.y + (buttonBr.y - buttonTl.y - fontSize) * 0.5f),
+                     gutter - ctx.s(style.labelGap), ink, label, Align::right);
+            else
+                text(ctx, font, fontSize,
+                     ImVec2(buttonTl.x, bankTl.y - gutter + ctx.s(style.labelGap)),
+                     buttonBr.x - buttonTl.x, ink, label);
+            break;
+
+        case BankLabelSide::after:
+            if (vertical)
+                text(ctx, font, fontSize,
+                     ImVec2(bankBr.x + ctx.s(style.labelGap),
+                            buttonTl.y + (buttonBr.y - buttonTl.y - fontSize) * 0.5f),
+                     gutter - ctx.s(style.labelGap), ink, label, Align::left);
+            else
+                text(ctx, font, fontSize,
+                     ImVec2(buttonTl.x, bankBr.y + ctx.s(style.labelGap)),
+                     buttonBr.x - buttonTl.x, ink, label);
+            break;
+        }
+    }
+
+    return result;
+}
+
 PillResult modulePill(Context& ctx, const char* const id, const ImVec2 tl, const ImVec2 br,
                       const char* const label, const bool engaged, const ImU32 accent)
 {
@@ -832,6 +1001,305 @@ GainReductionResult gainReduction(Context& ctx, const char* const id, const ImVe
                               ImVec2(barRight + ctx.s(1.0f), y),
                               hovered ? brighter(theme.grHandle, 0.4f) : theme.grHandle);
     return result;
+}
+
+// --------------------------------------------------------------------------------------------------------------------
+// the analogue needle meter
+
+float needleDeflection(const NeedleScale& scale, const float value) noexcept
+{
+    if (scale.customLaw != nullptr)
+        return clamp01(scale.customLaw(value, scale));
+
+    if (scale.law == NeedleLaw::amplitude)
+        return clamp01(std::pow(10.0f, (value - scale.maxValue) / 20.0f));
+
+    const float span = scale.maxValue - scale.minValue;
+    if (std::fabs(span) < 1.0e-9f)
+        return 0.0f;
+
+    return clamp01((value - scale.minValue) / span);
+}
+
+void NeedleBallistics::tick(const float targetDeflection, const float deltaSeconds,
+                            const float tauSeconds) noexcept
+{
+    const float target = clamp01(targetDeflection);
+
+    if (deltaSeconds <= 0.0f || tauSeconds <= 0.0f)
+    {
+        deflection = target;
+        return;
+    }
+
+    deflection += (target - deflection) * (1.0f - std::exp(-deltaSeconds / tauSeconds));
+}
+
+void NeedleBallistics::reset() noexcept
+{
+    deflection = 0.0f;
+}
+
+const NeedleScale& broadcastVuScale() noexcept
+{
+    // The printed marks of a standard VU face. -2 and +2 carry no number on a real face,
+    // which is what `major` says here.
+    static const NeedleTick ticks[] = {
+        { -20.0f, "20", true },
+        { -10.0f, "10", true },
+        {  -7.0f,  "7", true },
+        {  -5.0f,  "5", true },
+        {  -3.0f,  "3", true },
+        {  -2.0f, nullptr, false },
+        {  -1.0f,  "1", true },
+        {   0.0f,  "0", true },
+        {   1.0f,  "1", true },
+        {   2.0f, nullptr, false },
+        {   3.0f,  "3", true },
+    };
+
+    static const NeedleScale scale = [] {
+        NeedleScale s;
+        s.ticks = ticks;
+        s.tickCount = (int) (sizeof(ticks) / sizeof(ticks[0]));
+        s.minValue = -20.0f;
+        // +3 VU is full deflection, so the amplitude law puts 0 VU at 10^(-3/20) = 0.708
+        // of the travel, which is where a VU face prints it.
+        s.maxValue = 3.0f;
+        s.redFrom = 0.0f;
+        s.red = true;
+        s.law = NeedleLaw::amplitude;
+        return s;
+    }();
+
+    return scale;
+}
+
+const NeedleInnerTick* broadcastVuPercentTicks(int& count) noexcept
+{
+    // 0 VU reads 100%, and the percentage row is linear in amplitude, so it lands on the
+    // same travel as the decibel row scaled by the deflection 0 VU sits at.
+    static constexpr float atZeroVu = 0.70794578f; // 10^(-3/20)
+    static const NeedleInnerTick ticks[] = {
+        { 0.0f * atZeroVu, "0" },
+        { 0.2f * atZeroVu, "20" },
+        { 0.4f * atZeroVu, "40" },
+        { 0.6f * atZeroVu, "60" },
+        { 0.8f * atZeroVu, "80" },
+        { 1.0f * atZeroVu, "100" },
+    };
+
+    count = (int) (sizeof(ticks) / sizeof(ticks[0]));
+    return ticks;
+}
+
+const NeedleScale& gainReductionScale() noexcept
+{
+    static const NeedleTick ticks[] = {
+        { 20.0f, "20", true },
+        { 19.0f, nullptr, false },
+        { 18.0f, nullptr, false },
+        { 17.0f, nullptr, false },
+        { 16.0f, nullptr, false },
+        { 15.0f, "15", true },
+        { 14.0f, nullptr, false },
+        { 13.0f, nullptr, false },
+        { 12.0f, nullptr, false },
+        { 11.0f, nullptr, false },
+        { 10.0f, "10", true },
+        {  9.0f, nullptr, false },
+        {  8.0f, nullptr, false },
+        {  7.0f, nullptr, false },
+        {  6.0f, nullptr, false },
+        {  5.0f,  "5", true },
+        {  4.0f, nullptr, false },
+        {  3.0f, nullptr, false },
+        {  2.0f, nullptr, false },
+        {  1.0f, nullptr, false },
+        {  0.0f,  "0", true },
+    };
+
+    static const NeedleScale scale = [] {
+        NeedleScale s;
+        s.ticks = ticks;
+        s.tickCount = (int) (sizeof(ticks) / sizeof(ticks[0]));
+        // Inverted endpoints: no reduction rests the needle at full right, and it swings
+        // left as the compressor works.
+        s.minValue = 20.0f;
+        s.maxValue = 0.0f;
+        s.law = NeedleLaw::linear;
+        return s;
+    }();
+
+    return scale;
+}
+
+void needleMeter(const Context& ctx, const ImVec2 tl, const ImVec2 br, const float deflection,
+                 const NeedleScale& scale, const NeedleMeterStyle& style)
+{
+    ImDrawList* const dl = ctx.dl;
+
+    const ImU32 face = style.face != 0 ? style.face : IM_COL32(0xf0, 0xe7, 0xcd, 0xff);
+    const ImU32 faceShade = style.faceShade != 0 ? style.faceShade : darker(face, 0.12f);
+    const ImU32 ink = style.ink != 0 ? style.ink : IM_COL32(0x26, 0x20, 0x18, 0xff);
+    const ImU32 accent = style.accent != 0 ? style.accent : IM_COL32(0xc4, 0x2a, 0x22, 0xff);
+    const ImU32 needleColour = style.needle != 0 ? style.needle : ink;
+    const ImU32 innerInk = style.innerInk != 0 ? style.innerInk : withAlpha(ink, 0.62f);
+
+    // The housing, when one was asked for; the face keeps whatever is left.
+    ImVec2 faceTl = tl;
+    ImVec2 faceBr = br;
+
+    if (style.bezel != 0)
+    {
+        const float inset = ctx.s(style.bezelInset);
+        dl->AddRectFilled(tl, br, style.bezel, ctx.s(style.rounding + 3.0f));
+        dl->AddRect(tl, br, darker(style.bezel, 0.45f), ctx.s(style.rounding + 3.0f), 0,
+                    ctx.s(1.2f));
+        // Two rails, light along the top and dark along the bottom, are enough to read as
+        // a machined housing without the four-quad bevel each faceplate had of its own.
+        dl->AddLine(ImVec2(tl.x + inset, tl.y + inset * 0.5f),
+                    ImVec2(br.x - inset, tl.y + inset * 0.5f),
+                    withAlpha(brighter(style.bezel, 0.45f), 0.75f), ctx.s(1.4f));
+        dl->AddLine(ImVec2(tl.x + inset, br.y - inset * 0.5f),
+                    ImVec2(br.x - inset, br.y - inset * 0.5f),
+                    withAlpha(darker(style.bezel, 0.55f), 0.75f), ctx.s(1.4f));
+
+        faceTl = ImVec2(tl.x + inset, tl.y + inset);
+        faceBr = ImVec2(br.x - inset, br.y - inset);
+    }
+
+    if (faceBr.x - faceTl.x < 4.0f || faceBr.y - faceTl.y < 4.0f)
+        return;
+
+    const float rounding = ctx.s(style.rounding);
+    dl->AddRectFilled(faceTl, faceBr, face, rounding);
+    dl->AddRectFilledMultiColor(faceTl, faceBr, withAlpha(face, 0.0f), withAlpha(face, 0.0f),
+                                withAlpha(faceShade, 0.85f), withAlpha(faceShade, 0.85f));
+    dl->AddRect(faceTl, faceBr, withAlpha(darker(face, 0.55f), 0.7f), rounding, 0, ctx.s(0.9f));
+
+    // The pivot sits just below the face so the swing fills it, which is how a real meter
+    // is built and why the numbers arc rather than sitting on a line.
+    const float faceWidth = faceBr.x - faceTl.x;
+    const float faceHeight = faceBr.y - faceTl.y;
+    const ImVec2 pivot(faceTl.x + faceWidth * 0.5f, faceBr.y - ctx.s(5.0f));
+    const float radius = std::min(faceWidth * 0.48f, faceHeight * 0.94f);
+
+    const float startAngle = style.startAngle * 0.01745329f;
+    const float endAngle = style.endAngle * 0.01745329f;
+    const auto angleFor = [&](const float d) {
+        return startAngle + clamp01(d) * (endAngle - startAngle);
+    };
+    // Angles are measured from straight up so a face reads the way it is described.
+    const auto pointAt = [&](const float r, const float angle) {
+        return ImVec2(pivot.x + std::sin(angle) * r, pivot.y - std::cos(angle) * r);
+    };
+
+    ImFont* const font = style.font != nullptr ? style.font
+                       : (ctx.fonts != nullptr && ctx.fonts->caption != nullptr ? ctx.fonts->caption
+                                                                               : ImGui::GetFont());
+
+    const auto number = [&](const float r, const float angle, const char* const label,
+                            const ImU32 colour, const float size) {
+        if (label == nullptr || *label == 0 || font == nullptr)
+            return;
+        const ImVec2 extent = font->CalcTextSizeA(size, FLT_MAX, 0.0f, label);
+        const ImVec2 at = pointAt(r, angle);
+        dl->AddText(font, size, ImVec2(std::round(at.x - extent.x * 0.5f),
+                                       std::round(at.y - extent.y * 0.5f)), colour, label);
+    };
+
+    const float arcRadius = radius * 0.90f;
+
+    if (style.arc)
+    {
+        // PathArcTo measures from the positive x axis, so the same angle is a quarter turn
+        // back from the one the ticks use.
+        dl->PathArcTo(pivot, arcRadius, startAngle - 1.5707963f, endAngle - 1.5707963f, 40);
+        dl->PathStroke(withAlpha(ink, 0.55f), 0, ctx.s(0.9f));
+    }
+
+    if (scale.red)
+    {
+        const float redStart = needleDeflection(scale, scale.redFrom);
+        if (redStart < 0.999f)
+        {
+            dl->PathArcTo(pivot, arcRadius, angleFor(redStart) - 1.5707963f, endAngle - 1.5707963f,
+                          20);
+            dl->PathStroke(accent, 0, ctx.s(2.6f));
+        }
+    }
+
+    const float labelSize = ctx.s(style.labelSize);
+
+    for (int i = 0; i < scale.tickCount; ++i)
+    {
+        const NeedleTick& tick = scale.ticks[i];
+        const float d = needleDeflection(scale, tick.value);
+        const float angle = angleFor(d);
+        const bool hot = scale.red && ((scale.maxValue >= scale.minValue) ? tick.value > scale.redFrom
+                                                                         : tick.value < scale.redFrom);
+        const ImU32 colour = hot ? accent : ink;
+
+        dl->AddLine(pointAt(arcRadius, angle),
+                    pointAt(arcRadius + ctx.s(tick.major ? 6.0f : 4.0f), angle),
+                    colour, ctx.s(tick.major ? 1.5f : 0.9f));
+
+        number(radius * 0.79f, angle, tick.label, colour, labelSize);
+    }
+
+    const float innerSize = ctx.s(style.innerLabelSize);
+    for (int i = 0; i < scale.innerTickCount; ++i)
+        number(radius * 0.59f, angleFor(scale.innerTicks[i].deflection),
+               scale.innerTicks[i].label, innerInk, innerSize);
+
+    const float legendSize = ctx.s(style.legendSize);
+    if (style.legend != nullptr)
+        text(ctx, font, legendSize,
+             ImVec2(faceTl.x, pivot.y - radius * 0.46f - legendSize * 0.5f), faceWidth, ink,
+             style.legend);
+    if (style.sublegend != nullptr)
+        text(ctx, font, innerSize,
+             ImVec2(faceTl.x, pivot.y - radius * 0.46f + legendSize * 0.6f), faceWidth, innerInk,
+             style.sublegend);
+    if (style.leftMark != nullptr)
+        text(ctx, font, legendSize, ImVec2(faceTl.x + ctx.s(6.0f), faceTl.y + ctx.s(2.0f)),
+             ctx.s(16.0f), ink, style.leftMark);
+    if (style.rightMark != nullptr)
+        text(ctx, font, legendSize,
+             ImVec2(faceBr.x - ctx.s(22.0f), faceTl.y + ctx.s(2.0f)), ctx.s(16.0f), accent,
+             style.rightMark);
+
+    // The needle: a shadow offset down-right, then a tapered blade, then the mound.
+    const float angle = angleFor(deflection);
+    const float bladeLength = radius * 0.94f;
+    const ImVec2 tip = pointAt(bladeLength, angle);
+
+    dl->AddLine(ImVec2(pivot.x + ctx.s(2.0f), pivot.y + ctx.s(1.2f)),
+                ImVec2(tip.x + ctx.s(2.0f), tip.y + ctx.s(1.2f)),
+                withAlpha(ink, 0.28f), ctx.s(3.6f));
+
+    const float halfWidth = ctx.s(1.7f);
+    const float across = angle + 1.5707963f;
+    dl->AddTriangleFilled(ImVec2(pivot.x + std::sin(across) * halfWidth,
+                                 pivot.y - std::cos(across) * halfWidth),
+                          tip,
+                          ImVec2(pivot.x - std::sin(across) * halfWidth,
+                                 pivot.y + std::cos(across) * halfWidth),
+                          needleColour);
+
+    dl->AddCircleFilled(ImVec2(pivot.x, pivot.y + ctx.s(1.0f)), ctx.s(8.0f),
+                        withAlpha(ink, 0.35f), 20);
+    dl->AddCircleFilled(pivot, ctx.s(4.6f), needleColour, 18);
+    dl->AddCircleFilled(ImVec2(pivot.x - ctx.s(1.2f), pivot.y - ctx.s(1.4f)), ctx.s(1.5f),
+                        withAlpha(brighter(face, 0.4f), 0.6f), 10);
+
+    if (style.glass)
+        dl->AddRectFilledMultiColor(ImVec2(faceTl.x + ctx.s(3.0f), faceTl.y + ctx.s(2.0f)),
+                                    ImVec2(faceBr.x - ctx.s(3.0f),
+                                           faceTl.y + faceHeight * 0.24f),
+                                    IM_COL32(255, 255, 255, 34), IM_COL32(255, 255, 255, 34),
+                                    IM_COL32(255, 255, 255, 0), IM_COL32(255, 255, 255, 0));
 }
 
 // --------------------------------------------------------------------------------------------------------------------

@@ -406,6 +406,126 @@ GainReductionResult gainReduction(Context& ctx, const char* id, ImVec2 tl, ImVec
                                   float reductionDb, float threshold,
                                   const GainReductionStyle& style = GainReductionStyle());
 
+// --------------------------------------------------------------------------------------------------------------------
+// the analogue needle meter
+
+/**
+   How a value maps to needle deflection, which is the one thing a printed meter face
+   never states and every meter gets wrong differently.
+ */
+enum class NeedleLaw {
+    // Deflection is linear in the value. A gain-reduction meter, a percentage scale, a
+    // VU face whose endpoints are already expressed as deflection.
+    linear,
+    // Deflection is linear in signal amplitude while the scale is printed in decibels,
+    // which is what gives a broadcast VU its crowded left end and open right end:
+    // deflection = 10^((value - maxValue) / 20), so maxValue is full-scale deflection.
+    amplitude,
+};
+
+/**
+   One mark on the face. A tick with no label draws the line alone.
+ */
+struct NeedleTick {
+    float value;
+    const char* label;
+    bool major;
+};
+
+/**
+   A second row of numbers nearer the pivot, the way a VU face carries a percentage row
+   under its decibel row. Positions are deflections, 0 at the left stop and 1 at the
+   right, because the second row is a different unit spread over the same travel.
+ */
+struct NeedleInnerTick {
+    float deflection;
+    const char* label;
+};
+
+/**
+   The face as data: where the needle can point, what is printed on it, and where the
+   red zone starts. Everything a caller has to change to turn a VU into a
+   gain-reduction meter lives here rather than in the drawing code.
+
+   The endpoints may be inverted -- minValue 20, maxValue 0 gives the gain-reduction
+   meter that rests at full right and swings left as it works.
+ */
+struct NeedleScale {
+    const NeedleTick* ticks = nullptr;
+    int tickCount = 0;
+    const NeedleInnerTick* innerTicks = nullptr;
+    int innerTickCount = 0;
+
+    float minValue = 0.0f; // deflection 0 for the linear law
+    float maxValue = 1.0f; // deflection 1, and the amplitude law's full-scale reference
+    // Where the red zone begins, in scale units. Outside the endpoints draws none.
+    float redFrom = 0.0f;
+    bool red = false;
+
+    NeedleLaw law = NeedleLaw::linear;
+    // Takes over from `law` when set: value in, deflection 0..1 out.
+    float (*customLaw)(float value, const NeedleScale& scale) = nullptr;
+};
+
+// Where the needle sits for a value, clamped to the travel. Public because the
+// ballistics are the caller's: a meter is smoothed in deflection, not in its own units,
+// or the smoothing changes shape along the scale.
+float needleDeflection(const NeedleScale& scale, float value) noexcept;
+
+/**
+   The cosmetic pole in front of a needle. Not a meter ballistic: the 300 ms VU
+   integration belongs in the DSP, and this only stops the needle stepping once per
+   frame when the source updates more slowly than the display.
+ */
+struct NeedleBallistics {
+    float deflection = 0.0f;
+
+    void tick(float targetDeflection, float deltaSeconds, float tauSeconds = 0.025f) noexcept;
+    void reset() noexcept;
+};
+
+struct NeedleMeterStyle {
+    ImU32 face = 0;       // 0 takes the aged-cream face
+    ImU32 faceShade = 0;  // the bottom of the face gradient; 0 derives it from `face`
+    ImU32 ink = 0;        // ticks, numbers, legends
+    ImU32 accent = 0;     // the red zone, its ticks and its numbers
+    ImU32 needle = 0;     // 0 takes `ink`
+    ImU32 bezel = 0;      // the housing; 0 draws the face alone
+    ImU32 innerInk = 0;   // the second tick row; 0 fades `ink`
+
+    const char* legend = nullptr;    // "VU"
+    const char* sublegend = nullptr; // channel tag, "GAIN REDUCTION"
+    const char* leftMark = nullptr;  // the corner marks a VU face carries
+    const char* rightMark = nullptr;
+
+    ImFont* font = nullptr;   // null takes Fonts::caption
+    float labelSize = 10.0f;
+    float innerLabelSize = 8.5f;
+    float legendSize = 11.0f;
+
+    // Needle travel, in degrees either side of straight up.
+    float startAngle = -50.0f;
+    float endAngle = 50.0f;
+
+    float bezelInset = 7.0f;
+    float rounding = 3.0f;
+    bool arc = true;   // the hairline the ticks stand on
+    bool glass = true; // the reflection sweep across the face
+};
+
+// The face, the scale and the needle. Display only, so it takes no id and no Context
+// mutation: pass the deflection, which is what the ballistics produce.
+void needleMeter(const Context& ctx, ImVec2 tl, ImVec2 br, float deflection,
+                 const NeedleScale& scale,
+                 const NeedleMeterStyle& style = NeedleMeterStyle());
+
+// -20 to +3 VU with the red zone from 0, the broadcast face and its amplitude law.
+const NeedleScale& broadcastVuScale() noexcept;
+// The percentage row a broadcast VU carries under its decibel row, 0 to 100.
+const NeedleInnerTick* broadcastVuPercentTicks(int& count) noexcept;
+// 20 dB of gain reduction down to 0, resting at full right, linear in decibels.
+const NeedleScale& gainReductionScale() noexcept;
+
 struct PillResult {
     bool toggled = false;      // the LED half was clicked
     bool labelClicked = false; // the label half was clicked
@@ -436,6 +556,62 @@ struct ButtonResult {
 
 ButtonResult textButton(Context& ctx, const char* id, ImVec2 tl, ImVec2 br, const char* label,
                         bool on, const ButtonStyle& style = ButtonStyle());
+
+/**
+   A hardware latching button bank: a row or column of rectangular buttons of which
+   exactly one is down, which is the control every Dusk faceplate had been
+   re-implementing by hand.
+ */
+enum class BankOrientation { vertical, horizontal };
+
+// Where each button's label sits, on the cross axis of the bank. `before` is left of a
+// column and above a row; `after` is right of a column and below a row. Both carve
+// `labelGutter` design pixels off that side of the box, so the buttons keep the rest.
+enum class BankLabelSide { inside, before, after };
+
+// How the selected button reads. `tab` lights a strip along its leading edge, the way a
+// backlit ratio bank does; `pressed` inverts its bevel so the button looks pushed in.
+enum class BankActiveStyle { tab, pressed };
+
+struct ButtonBankStyle {
+    BankOrientation orientation = BankOrientation::vertical;
+    BankLabelSide labelSide = BankLabelSide::before;
+    BankActiveStyle activeStyle = BankActiveStyle::tab;
+
+    ImU32 face = 0;        // 0 takes Theme::buttonOff
+    ImU32 faceActive = 0;  // 0 darkens `face`
+    ImU32 border = 0;      // 0 takes Theme::pillBorder
+    ImU32 tab = 0;         // the lit strip; 0 takes Theme::grHandle
+    ImU32 label = 0;       // 0 takes Theme::textDim
+    ImU32 labelActive = 0; // 0 takes Theme::textBright
+    ImU32 caption = 0;     // 0 takes Theme::textDim
+
+    ImFont* font = nullptr; // null takes Fonts::caption
+    float fontSize = 8.0f;
+    float captionSize = 8.5f;
+    const char* captionText = nullptr; // drawn centred above the bank
+
+    float gap = 3.0f;         // between buttons, along the bank axis
+    float labelGutter = 26.0f;
+    float labelGap = 4.0f;
+    float rounding = 1.5f;
+    bool shadow = true;
+
+    // Visual position to option index, for a bank printed in an order the parameter is
+    // not: a ratio column reading 20, 12, 8, 4, ALL over choices 0..4. Null is identity,
+    // and the result is always an option index whichever way the face is printed.
+    const int* order = nullptr;
+};
+
+struct ButtonBankResult {
+    int clicked = -1; // option index, -1 when nothing was clicked this frame
+    int hovered = -1;
+    bool changed = false; // clicked, and it was not already the selected option
+};
+
+ButtonBankResult buttonBank(Context& ctx, const char* id, ImVec2 tl, ImVec2 br,
+                            const char* const* labels, int count, int selected,
+                            const ButtonBankStyle& style = ButtonBankStyle());
 
 // A floating readout beside the pointer. Drawn on the foreground list so a later strip
 // cannot cover it.
