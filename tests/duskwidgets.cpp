@@ -48,6 +48,11 @@ public:
         io.FontDefault = fonts.band;
         io.Fonts->Build();
         knobs.rasterise(*io.Fonts);
+
+        // The stock broadcast face plus its percentage row, which is optional because a
+        // gain-reduction face has no second row to print.
+        vuScale = dw::broadcastVuScale();
+        vuScale.innerTicks = dw::broadcastVuPercentTicks(vuScale.innerTickCount);
     }
 
 protected:
@@ -181,6 +186,67 @@ protected:
         if (gr.changed)
             threshold = gr.threshold;
 
+        // The needle meters, driven from the same programme signal, with the scale as data:
+        // the same widget is a broadcast VU or a gain-reduction meter depending only on
+        // which NeedleScale it is handed.
+        vuNeedle.tick(dw::needleDeflection(vuScale, meterBallistics.displayed + 2.0f),
+                      ImGui::GetIO().DeltaTime);
+        grNeedle.tick(dw::needleDeflection(dw::gainReductionScale(),
+                                           std::max(0.0f, meterBallistics.displayed - threshold)),
+                      ImGui::GetIO().DeltaTime);
+
+        const float rightLeft = 180.0f;
+        const float rightRight = std::max(rightLeft + 120.0f, width - 20.0f);
+
+        dw::NeedleMeterStyle vuStyle;
+        vuStyle.bezel = IM_COL32(0xa8, 0x8c, 0x60, 0xff);
+        vuStyle.legend = "VU";
+        vuStyle.sublegend = "L";
+        vuStyle.leftMark = "-";
+        vuStyle.rightMark = "+";
+        dw::needleMeter(ctx, ImVec2(rightLeft, top), ImVec2(rightRight, top + 140.0f),
+                        vuNeedle.deflection, vuScale, vuStyle);
+
+        dw::NeedleMeterStyle grStyle2;
+        grStyle2.bezel = IM_COL32(0x4b, 0x4f, 0x50, 0xff);
+        grStyle2.face = IM_COL32(0xf3, 0xd6, 0x8d, 0xff);
+        grStyle2.ink = IM_COL32(0x5e, 0x40, 0x22, 0xff);
+        grStyle2.legend = "VU";
+        grStyle2.sublegend = "GAIN REDUCTION";
+        dw::needleMeter(ctx, ImVec2(rightLeft, top + 150.0f),
+                        ImVec2(rightRight, top + 290.0f), grNeedle.deflection,
+                        dw::gainReductionScale(), grStyle2);
+
+        // A latching bank in each orientation and each active style, including the
+        // visual-order remap a printed ratio column needs.
+        static const char* const ratios[] = { "4", "8", "12", "20", "ALL" };
+        static const int ratioOrder[] = { 3, 2, 1, 0, 4 };
+
+        dw::ButtonBankStyle bank;
+        bank.captionText = "RATIO";
+        bank.order = ratioOrder;
+        const auto ratio = dw::buttonBank(ctx, "##ratio", ImVec2(rightLeft, top + 330.0f),
+                                          ImVec2(rightLeft + 58.0f, top + 460.0f), ratios, 5,
+                                          ratioIndex, bank);
+        if (ratio.changed)
+            ratioIndex = ratio.clicked;
+
+        dw::ButtonBankStyle meterBank;
+        meterBank.orientation = dw::BankOrientation::horizontal;
+        meterBank.labelSide = dw::BankLabelSide::inside;
+        meterBank.activeStyle = dw::BankActiveStyle::pressed;
+        meterBank.captionText = "METER";
+        meterBank.face = IM_COL32(0x9a, 0x9a, 0x9e, 0xff);
+        meterBank.label = IM_COL32(0x2a, 0x2a, 0x2e, 0xff);
+        meterBank.labelActive = IM_COL32(0x10, 0x10, 0x12, 0xff);
+        static const char* const meterModes[] = { "GR", "+8", "+4", "OFF" };
+        const auto mode = dw::buttonBank(ctx, "##metermode",
+                                         ImVec2(rightLeft + 78.0f, top + 340.0f),
+                                         ImVec2(rightRight, top + 372.0f), meterModes, 4,
+                                         meterMode, meterBank);
+        if (mode.changed)
+            meterMode = mode.clicked;
+
         dw::drawDragBubble(ctx);
 
         std::snprintf(text, sizeof text, "%d widgets   %d verts", ctx.widgets,
@@ -199,6 +265,9 @@ private:
     dw::KnobAtlas knobs;
     dw::DragState drag;
     dw::MeterBallistics meterBallistics;
+    dw::NeedleBallistics vuNeedle;
+    dw::NeedleBallistics grNeedle;
+    dw::NeedleScale vuScale;
     dw::Range gainRange { -15.0f, 15.0f, 1.0f };
     dw::Range faderRange = dw::Range::withMidPoint(-90.0f, 6.0f, -12.0f);
 
@@ -206,6 +275,8 @@ private:
     float faderDb = 0.0f;
     float threshold = -14.0f;
     float phase = 0.0f;
+    int ratioIndex = 1;
+    int meterMode = 0;
     char name[64] = "KICK IN";
     bool compEngaged = true;
     bool muted = false;
@@ -222,8 +293,8 @@ int main(int, char**)
 
     Application app;
     DuskWidgetsGallery win(app);
-    win.setGeometryConstraints(360, 400, false);
-    win.setSize(420, 720);
+    win.setGeometryConstraints(460, 480, false);
+    win.setSize(520, 780);
     win.setResizable(true);
     win.setTitle("Dusk widgets");
     win.show();
