@@ -2,10 +2,15 @@
 ## Reusable GUI widgets for [DAF](https://github.com/dusk-audio/DAF), the Dusk Audio Framework
 
 **This is a fork of [DISTRHO/DPF-Widgets](https://github.com/DISTRHO/DPF-Widgets) by Filipe Coelho
-and contributors.** Essentially all of the code here is theirs and it is very good; this fork
-carries a two-line MSVC compatibility fix and exists so that [Dusk Audio](https://github.com/dusk-audio)
-builds pin one tree they control alongside [DAF](https://github.com/dusk-audio/DAF). If you are
-building on DPF, use DISTRHO's original.
+and contributors.** Most of the code here is theirs and it is very good. The fork exists so that
+[Dusk Audio](https://github.com/dusk-audio) builds pin one tree they control alongside
+[DAF](https://github.com/dusk-audio/DAF). If you are building on DPF, use DISTRHO's original.
+
+On top of upstream this tree carries an MSVC compatibility fix, a handful of Dear ImGui
+integration fixes (telling ImGui when the window focus changes, releasing the graphics context in
+the standalone constructor, keeping non-finite values out of the draw list, and clearing key state
+on focus loss without cancelling a drag in progress), and one widget set of its own,
+`opengl/DuskWidgets`, described under Status below.
 
 Renamed from DPF-Widgets to DAF-Widgets in August 2026 so that two identically named repositories
 stop sending people and tooling to the wrong tree. The name marks whose checkout this is, not
