@@ -1,3 +1,8 @@
+> **Archived: development has moved to [dusk-audio/DAF](https://github.com/dusk-audio/DAF).**
+> DAF-Widgets is now vendored at [`widgets/`](https://github.com/dusk-audio/DAF/tree/main/widgets).
+> This repository is retained for its history. Use a single DAF checkout and
+> [report issues in DAF](https://github.com/dusk-audio/DAF/issues).
+
 # DAF Widgets
 ## Reusable GUI widgets for [DAF](https://github.com/dusk-audio/DAF), the Dusk Audio Framework
 
